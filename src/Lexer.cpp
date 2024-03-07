@@ -14,7 +14,9 @@ char Lexer::next(){
 }
 
 char Lexer::peek(){
-    return fileContents[this->currentIndex+1];
+    return (this->currentIndex+1 < this->fileContents.size())?
+        fileContents[this->currentIndex+1]:
+        EOF;
 }
 
 char Lexer::current(){
