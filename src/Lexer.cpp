@@ -53,11 +53,12 @@ std::string Lexer::getIdentifier(){
 
 std::string Lexer::getHexNumber(){
     std::string str = "";
-
+    str += this->current();
+    
     char c;
     while ( (c = this->next() ) >= '0' && c <= '9' 
         || c>='a' && c <= 'f' || c >= 'A' && c <= 'F'){
-            
+
         str += c; 
     }
     return str;
@@ -65,6 +66,7 @@ std::string Lexer::getHexNumber(){
 
 std::string Lexer::getBinaryNumber(){
     std::string str = "";
+    str += this->current();
 
     char c;
     while ( (c = this->next() ) == '0' || c == '1'){
@@ -76,42 +78,13 @@ std::string Lexer::getBinaryNumber(){
 
 std::string Lexer::getDecimalNumber(){
     std::string str = "";
+    str += this->current();
 
     char c;
     while( (c=this->next())=='.' || c>= '0' && c <= '9' ){
         str += c;
     }
     return str;
-}
-
-
-TokenType Lexer::checkDecimalNumber(std::string str, int base){
-
-    try
-    {
-        std::stoll(str, nullptr, base);
-        return TokenType::INTEGER;
-    }
-    catch(const std::exception& e)
-    {
-        try
-        {
-            std::stoull(str, nullptr, base);
-            return TokenType::INTEGER;
-        }
-        catch(const std::exception& e)
-        {
-            try
-            {
-                std::stold(str);
-                return TokenType::REAL;
-            }
-            catch(const std::exception& e)
-            {
-                return TokenType::UNDEFINED; 
-            } 
-        }
-    } 
 }
 
 std::string Lexer::getStringLiteral(){
@@ -140,6 +113,17 @@ std::string Lexer::getStringLiteral(){
     return str;
 } 
 
+std::string Lexer::getCharLiteral(){
+    std::string str = "";
+    str += this->current();
+    
+    char c;
+    while((c = this->next()) != '\'' && c != EOF){
+        str += c;
+    }
+    return str; 
+}
+
 
 
 Token * Lexer::nextToken(){
@@ -164,25 +148,25 @@ Token * Lexer::nextToken(){
             switch (this->next())
             {
             case 'x': 
-                lexeme += 'x' + getHexNumber();
+                lexeme += getHexNumber();
                 base = NumberBase::HEX;
                 type = checkDecimalNumber(lexeme, (int)base);
             break;
             case 'b': 
                 base = NumberBase::BIN;
-                lexeme += 'b' + getBinaryNumber();
+                lexeme += getBinaryNumber();
                 type = checkDecimalNumber(lexeme, (int)base); 
             break;
             default:
                 base = NumberBase::DEC;
-                lexeme += this->current() + getDecimalNumber();
+                lexeme += getDecimalNumber();
                 type = checkDecimalNumber(lexeme, (int)base);
             break;
             }
         }
         else{
             base = NumberBase::DEC;
-            lexeme = this->current() + getDecimalNumber();
+            lexeme = getDecimalNumber();
             type = checkDecimalNumber(lexeme, (int)base);
         }
 
@@ -192,7 +176,8 @@ Token * Lexer::nextToken(){
         type = (peek()==EOF)? TokenType::UNDEFINED : TokenType::STRING;
     }
     else if(this->current() == '\''){
-
+        lexeme = getCharLiteral();
+        type = TokenType::CHAR; 
     }
     else {
 
@@ -213,6 +198,7 @@ Token * Lexer::nextToken(){
         case '-': type = getMinusToken(this->next()); break;
 
         default:
+            type = TokenType::UNDEFINED; 
             break;
         }
     }
@@ -221,10 +207,16 @@ Token * Lexer::nextToken(){
 
     auto token = new Token(type, lexeme, lineNumber, start, this->currentIndex);
     
-    switch (type)
+    switch (type) // add literal number values to union
     {
-    case TokenType::INTEGER: token->literal.integer =  std::stoll(lexeme,nullptr, (int)base) ; break;
+    case TokenType::INTEGER: token->literal.integer =  getIntegerLiteral(lexeme, (int)base) ; break;
     case TokenType::REAL: token->literal.Real =  std::stold(lexeme) ; break;
+    case TokenType::CHAR: 
+        token->literal.integer =  getCharValue(lexeme) ; 
+        if(token->literal.integer == (std::size_t)-1){
+            token->type = TokenType::UNDEFINED; 
+        }
+    break;
     default:break;
     }
 
