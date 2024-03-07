@@ -48,4 +48,28 @@ bool inline isNumberStart(char c){
     return (c >= '0' && c <= '9');
 }
 
+bool inline isBlank(char c){
+    return (
+        c == ' ' || c == '\t' || c == '\r' || c == '\n' || c =='\\'
+    );
+}
+
+TokenType inline getPlusToken(char c){
+    if( c == '=' ){
+        return TokenType::PLUS_EQUAL;
+    }
+    else{
+        return TokenType::PLUS;
+    }
+}
+
+TokenType inline getMinusToken(char c){
+    switch (c)
+    {
+    case '=': return TokenType::MINUS_EQUAL; 
+    case '>': return TokenType::THIN_ARROW; 
+    default : return TokenType::MINUS;     
+    }
+}
+
 #endif

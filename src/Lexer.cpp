@@ -1,10 +1,7 @@
 #include "Lexer.hpp"
 
 
-Lexer::Lexer(std::vector<char> contents)
-{
-    this->fileContents = contents;
-}
+Lexer::Lexer(std::vector<char> contents): fileContents{contents} {}
 
 char Lexer::next(){
     this->currentIndex++;
@@ -25,16 +22,11 @@ char Lexer::current(){
             EOF;
 }
 
-bool inline isBlank(char c){
-    return (
-        c == ' ' || c == '\t' || c == '\r' || c == '\n'
-    );
-}
 
 void Lexer::skipBlank() {
 
     char c; //if index is out of bounds of array char returned will be EOF
-    while(  this->current() != EOF && isBlank(this->current())){
+    while(  this->current() != EOF && isBlank(this->current()) ){
 
         if(this->current() == '\\' && this->peek() == '\\') { //single line comment
             while(this->next() != '\n' && this->current() != EOF);
@@ -63,11 +55,10 @@ std::string Lexer::getHexNumber(){
     std::string str = "";
 
     char c;
-    while ( (c = this->current() ) >= '0' && c <= '9' 
+    while ( (c = this->next() ) >= '0' && c <= '9' 
         || c>='a' && c <= 'f' || c >= 'A' && c <= 'F'){
-
+            
         str += c; 
-        this->next();
     }
     return str;
 }
@@ -76,20 +67,19 @@ std::string Lexer::getBinaryNumber(){
     std::string str = "";
 
     char c;
-    while ( (c = this->current() ) == '0' || c == '1'){
+    while ( (c = this->next() ) == '0' || c == '1'){
         str += c; 
-        this->next();
     }
     return str;
 }
+
 
 std::string Lexer::getDecimalNumber(){
     std::string str = "";
 
     char c;
-    while( (c=this->current())=='.' || c>= '0' && c <= '9' ){
+    while( (c=this->next())=='.' || c>= '0' && c <= '9' ){
         str += c;
-        this->next();
     }
     return str;
 }
@@ -130,7 +120,7 @@ std::string Lexer::getStringLiteral(){
     char c;
     while(true){
 
-        while( (c = this->current()) != '"' &&
+        while( (c = this->next()) != '"' &&
                 c != '\\' && c!= EOF
             ){
                 str += c;
@@ -149,6 +139,7 @@ std::string Lexer::getStringLiteral(){
     }
     return str;
 } 
+
 
 
 Token * Lexer::nextToken(){
@@ -189,6 +180,11 @@ Token * Lexer::nextToken(){
             break;
             }
         }
+        else{
+            base = NumberBase::DEC;
+            lexeme = this->current() + getDecimalNumber();
+            type = checkDecimalNumber(lexeme, (int)base);
+        }
 
     }
     else if(this->current() == '"'){
@@ -204,24 +200,22 @@ Token * Lexer::nextToken(){
 
         switch (this->current())
         {
-        case '.': type = TokenType::DOT; break;
-        case ',': type = TokenType::COMMA; break;
-        case ';': type = TokenType::SEMICOLON; break;
-        case '(': type = TokenType::LEFT_PAREN; break;
-        case ')': type = TokenType::RIGHT_PAREN; break;
-        case '[': type = TokenType::LEFT_BRACKET; break;
-        case ']': type = TokenType::RIGHT_BRACKET; break;
-        case '{': type = TokenType::LEFT_BRACE; break;
-        case '}': type = TokenType::RIGHT_BRACE; break;
+        case '.': type = TokenType::DOT;              break;
+        case ',': type = TokenType::COMMA;            break;
+        case ';': type = TokenType::SEMICOLON;        break;
+        case '(': type = TokenType::LEFT_PAREN;       break;
+        case ')': type = TokenType::RIGHT_PAREN;      break;
+        case '[': type = TokenType::LEFT_BRACKET;     break;
+        case ']': type = TokenType::RIGHT_BRACKET;    break;
+        case '{': type = TokenType::LEFT_BRACE;       break;
+        case '}': type = TokenType::RIGHT_BRACE;      break;
+        case '+': type = getPlusToken(this->next());  break; 
+        case '-': type = getMinusToken(this->next()); break;
+
         default:
             break;
         }
     }
-
-
-
-
-
 
 
 
