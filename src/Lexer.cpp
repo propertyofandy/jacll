@@ -20,7 +20,9 @@ char Lexer::peek(){
 }
 
 char Lexer::current(){
-    return fileContents[this->currentIndex];
+    return (this->currentIndex < this->fileContents.size())? 
+            fileContents[this->currentIndex] :
+            EOF;
 }
 
 bool inline isBlank(char c){
