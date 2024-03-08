@@ -1,8 +1,59 @@
 #include "Token.hpp"
 
+std::size_t inline getIntegerLiteral(std::string lexeme, int base){
+    try
+        {    //try getting unsigned long long
+            return std::stoull(lexeme, nullptr, base);
+        }
+        catch(const std::exception& e)
+        {   // if failed then number is negetive get long long and cast to unsigned
+            return (std::size_t)std::stoll(lexeme, nullptr, base);
+        }
+}
+
+std::size_t inline getCharValue(std::string lexeme){
+    if(lexeme.size() == 3){
+        return lexeme[1];  // return normal char
+    }
+    else if(lexeme == "\'n\'"){  // check for escape sequences
+        return '\n'; 
+    }
+    else if(lexeme == "\'t\'"){
+        return '\t';
+    }
+    else if(lexeme == "\'r\'"){
+        return '\r';
+    }
+    else if(lexeme == "\'b\'"){
+        return '\b';
+    }
+    else if(lexeme == "\'\'\'"){
+        return '\'';
+    }
+    else if(lexeme == "\'\"\'"){
+        return '\"';
+    }
+    else if(lexeme == "\'\\\'"){
+        return '\\';
+    }
+    else if(lexeme == "\'\a\'"){
+        return '\a';
+    }
+    else if(lexeme == "\'\f\'"){
+        return '\f';
+    }
+    else if(lexeme == "\'\v\'"){
+        return '\v';
+    }
+    else return (std::size_t)-1; // return max ull value for undefined 
+    
+}
+
+
+
 Token::Token(TokenType type, std::string lexeme, 
              size_t lineNumber, size_t leftIndex, 
-             size_t rightIndex):
+             size_t rightIndex, int base):
              type{type}, 
              lexeme{lexeme}, 
              lineNumber{lineNumber}, 
@@ -13,10 +64,10 @@ Token::Token(TokenType type, std::string lexeme,
 
     switch (type)
     {
-    case TokenType::INTEGER: this->literal.integer = std::atoll(lexeme.c_str()); break;
-    case TokenType::REAL   : this->literal.Real    = std::stod(lexeme.c_str()) ;
-    default:
-        break;
+    case TokenType::INTEGER: this->literal.integer = getIntegerLiteral(lexeme, base); break;
+    case TokenType::REAL   : this->literal.Real    = std::stold(lexeme)             ; break;
+    case TokenType::CHAR   : this->literal.integer = getCharValue(lexeme)           ; break;
+    default: break;
     }
 }
 
@@ -44,7 +95,6 @@ std::string Token::tokenTypeToString(){
     case TokenType::BIT_OR         : return "|"         ;
     case TokenType::BANG           : return "!"         ;
     case TokenType::BIT_AND        : return "&"         ;
-    case TokenType::HAT            : return "^"         ;
     case TokenType::BIT_NOT        : return "~"         ;
     case TokenType::LESS           : return "<"         ;
     case TokenType::GREATER        : return ">"         ;
@@ -82,7 +132,7 @@ std::string Token::tokenTypeToString(){
     case TokenType::BIT_OR_EQUAL   : return "|="        ;
     case TokenType::BIT_XOR        : return "><"        ;
     case TokenType::BIT_XOR_EQUAL  : return "><="       ;
-    case TokenType::DOUBLE_COLON   : return "::"        ;
+    case TokenType::COLON_COLON    : return "::"        ;
     case TokenType::EQUAL_EQUAL    : return "=="        ;
     case TokenType::FAT_ARROW      : return "=>"        ;
     case TokenType::GREATER_EQUAL  : return ">="        ;
@@ -111,7 +161,7 @@ std::size_t Token::getWeight(){
     case TokenType::BIT_LSHIFT_SET: case TokenType::BIT_RSHIFT_SET: case TokenType::BIT_NOT_EQUAL:
         return 18;
     
-    case TokenType::COLON:  case   TokenType::DOUBLE_COLON: return 17;
+    case TokenType::COLON:  case   TokenType::COLON_COLON: return 17;
     case TokenType::COMMA:  return 16;
     case TokenType::THIN_ARROW: case TokenType::FAT_ARROW:  return 15;
     case TokenType::OR:     return 13;

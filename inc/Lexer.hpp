@@ -38,6 +38,13 @@ private:
     std::string getDecimalNumber();
     std::string getStringLiteral();
     std::string getCharLiteral();
+
+
+    TokenType getGTLTToken(TokenType type);
+    TokenType getAndOrToken(TokenType type);
+    TokenType getArrowToken(TokenType type);
+
+    TokenType Lexer::getWithEqual(TokenType type);
 };
 
 
@@ -64,22 +71,9 @@ bool inline isBlank(char c){
     );
 }
 
-TokenType inline getPlusToken(char c){
-    if( c == '=' ){
-        return TokenType::PLUS_EQUAL;
-    }
-    else{
-        return TokenType::PLUS;
-    }
-}
-
-TokenType inline getMinusToken(char c){
-    switch (c)
-    {
-    case '=': return TokenType::MINUS_EQUAL; 
-    case '>': return TokenType::THIN_ARROW; 
-    default : return TokenType::MINUS;     
-    }
+bool inline isValidHex(char c){
+    return ( c >= '0' && c <= '9' 
+        || c>='a' && c <= 'f' || c >= 'A' && c <= 'F');
 }
 
 TokenType inline checkDecimalNumber(std::string str, int base){
@@ -112,53 +106,26 @@ TokenType inline checkDecimalNumber(std::string str, int base){
 }
 
 
-std::size_t inline getIntegerLiteral(std::string lexeme, int base){
-    try
-        {    //try getting unsigned long long
-            return std::stoull(lexeme, nullptr, base);
-        }
-        catch(const std::exception& e)
-        {   // if failed then number is negetive get long long and cast to unsigned
-            return (std::size_t)std::stoll(lexeme, nullptr, base);
-        }
+
+
+
+
+
+TokenType inline getColonToken(char c){
+    switch (c)
+    {
+    case ':': return TokenType::COLON_COLON;
+    default : return TokenType::COLON; 
+    }
 }
 
-std::size_t inline getCharValue(std::string lexeme){
-    if(lexeme.size() == 3){
-        return lexeme[1];  // return normal char
+TokenType inline getMinusToken(char c){
+    switch (c)
+    {
+    case '=': return TokenType::MINUS_EQUAL; 
+    case '>': return TokenType::THIN_ARROW; 
+    default : return TokenType::MINUS;     
     }
-    else if(lexeme == "\'n\'"){  // check for escape sequences
-        return '\n'; 
-    }
-    else if(lexeme == "\'t\'"){
-        return '\t';
-    }
-    else if(lexeme == "\'r\'"){
-        return '\r';
-    }
-    else if(lexeme == "\'b\'"){
-        return '\b';
-    }
-    else if(lexeme == "\'\'\'"){
-        return '\'';
-    }
-    else if(lexeme == "\'\"\'"){
-        return '\"';
-    }
-    else if(lexeme == "\'\\\'"){
-        return '\\';
-    }
-    else if(lexeme == "\'\a\'"){
-        return '\a';
-    }
-    else if(lexeme == "\'\f\'"){
-        return '\f';
-    }
-    else if(lexeme == "\'\v\'"){
-        return '\v';
-    }
-    else return (std::size_t)-1; // return max ull value
-    
 }
 
 #endif
