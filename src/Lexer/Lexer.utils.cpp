@@ -41,45 +41,15 @@ void Lexer::skipBlank() {
     }
 }
 
-std::string Lexer::getIdentifier(){
+
+
+
+std::string Lexer::getSymbol( bool (*isvalid)(char c)){
     std::string ident = "";
     do{
         ident += this->current();
-    }while (isIdentifier(this->next()));
+    }while (isvalid(this->next()));
     return ident; 
-}
-
-std::string Lexer::getHexNumber(){
-    std::string str = "";
-
-    do{
-        str += this->current();
-    }while(isValidHex(this->next()));
-
-    return str;
-}
-
-std::string Lexer::getBinaryNumber(){
-    std::string str = "";
-    str += this->current();
-
-    char c;
-    while ( (c = this->next() ) == '0' || c == '1'){
-        str += c; 
-    }
-    return str;
-}
-
-
-std::string Lexer::getDecimalNumber(){
-    std::string str = "";
-    str += this->current();
-
-    char c;
-    while( (c=this->next())=='.' || c>= '0' && c <= '9' ){
-        str += c;
-    }
-    return str;
 }
 
 std::string Lexer::getStringLiteral(){

@@ -11,7 +11,7 @@ Token * Lexer::nextToken(){
            start = this->currentIndex;
            
     if(isIdentifierStart( this->current() )){
-        lexeme = getIdentifier();
+        lexeme = getSymbol(&isIdentifier);
         type = TokenType::IDENTIFIER; 
     }
     else if(isNumberStart(this->current())){
@@ -22,25 +22,25 @@ Token * Lexer::nextToken(){
             switch (this->next())
             {
             case 'x': 
-                lexeme += getHexNumber();
+                lexeme += getSymbol(&isValidHex);
                 base = NumberBase::HEX;
                 type = checkDecimalNumber(lexeme, (int)base);
             break;
             case 'b': 
                 base = NumberBase::BIN;
-                lexeme += getBinaryNumber();
+                lexeme += getSymbol(&isValidBin);
                 type = checkDecimalNumber(lexeme, (int)base); 
             break;
             default:
                 base = NumberBase::DEC;
-                lexeme += getDecimalNumber();
+                lexeme += getSymbol(&isValidNumber);
                 type = checkDecimalNumber(lexeme, (int)base);
             break;
             }
         }
         else{
             base = NumberBase::DEC;
-            lexeme = getDecimalNumber();
+            lexeme = getSymbol(&isValidNumber);
             type = checkDecimalNumber(lexeme, (int)base);
         }
 

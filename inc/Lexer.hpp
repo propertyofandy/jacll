@@ -32,10 +32,8 @@ private:
     std::size_t getIndex();
     
     void skipBlank();
-    std::string getIdentifier();
-    std::string getHexNumber();
-    std::string getBinaryNumber();
-    std::string getDecimalNumber();
+
+    std::string getSymbol( bool (*isvalid)(char c));
     std::string getStringLiteral();
     std::string getCharLiteral();
 
@@ -52,13 +50,9 @@ private:
 // INLINE FUNCTION DEFENITIONS
 //////////////////////////////////////////////
 
+
 bool inline isIdentifierStart(char c) {
     return (c == '_' || c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z');
-}
-
-bool inline isIdentifier(char c) {
-
-    return (c == '_' || c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z' || c >= '0' && c <= '9');
 }
 
 bool inline isNumberStart(char c){
@@ -71,10 +65,6 @@ bool inline isBlank(char c){
     );
 }
 
-bool inline isValidHex(char c){
-    return ( c >= '0' && c <= '9' 
-        || c>='a' && c <= 'f' || c >= 'A' && c <= 'F');
-}
 
 TokenType inline checkDecimalNumber(std::string str, int base){
 
@@ -127,5 +117,29 @@ TokenType inline getMinusToken(char c){
     default : return TokenType::MINUS;     
     }
 }
+
+///////doesnt inline do to using it in higher order function ie is a sttatic function defined in header
+bool inline isIdentifier(char c) {
+
+    return (c == '_' || c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z' || c >= '0' && c <= '9');
+}
+
+///////doesnt inline do to using it in higher order function ie is a sttatic function defined in header
+bool inline isValidHex(char c){
+    return ( c >= '0' && c <= '9' 
+        || c>='a' && c <= 'f' || c >= 'A' && c <= 'F');
+}
+///////doesnt inline do to using it in higher order function ie is a sttatic function defined in header
+bool inline isValidBin(char c){
+    return (
+        c == '0' || c == '1'
+    );
+}
+///////doesnt inline do to using it in higher order function ie is a sttatic function defined in header
+bool inline isValidNumber(char c){
+    return (c >= '0' && c <= '9' || c == '.');
+}
+
+
 
 #endif
